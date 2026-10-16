@@ -1,0 +1,53 @@
+name: Compilar Versão Final (Release)
+
+on:
+  push:
+    tags:
+      - 'v*' # A automação será ativada sempre que você enviar uma tag de versão (ex: v1.0.0)
+
+jobs:
+  build:
+    name: Compilar para ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: todo-list-cli-linux
+            asset_name: todo-list-cli-linux
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: todo-list-cli-windows.exe
+            asset_name: todo-list-cli-windows.exe
+
+    steps:
+      - name: Baixar o código fonte
+        uses: actions/checkout@v4
+
+      - name: Configurar o ambiente Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Compilar o projeto em modo Release
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Preparar arquivos para o Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd target/${{ matrix.target }}/release
+          rename todo-list-cli.exe ${{ matrix.artifact_name }}
+
+      - name: Preparar arquivos para o Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd target/${{ matrix.target }}/release
+          mv todo-list-cli ${{ matrix.artifact_name }}
+
+      - name: Enviar executáveis para a página de Release do GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          files: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
