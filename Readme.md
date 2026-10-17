@@ -29,8 +29,8 @@ Se você tiver o ambiente Rust configurado, pode clonar e instalar localmente vi
 
 ```bash
 # Clonar o repositório
-git clone https://github.com
-cd SEU_REPOSITORIO
+git clone https://github.com/crl1092/todo_cli.git
+cd todo_cli
 
 # Instalar globalmente via Cargo
 cargo install --path .
