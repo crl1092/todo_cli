@@ -2,6 +2,7 @@ use clap::{Parser,Subcommand};
 use std::fs::{self,File, OpenOptions};
 use std::io::{Read, Write };
 use std::path::PathBuf;
+use colored::*;
 
 #[derive(Parser)]
 #[command(name = "todo-cli")]
@@ -61,7 +62,6 @@ fn get_data_path() -> PathBuf {
 fn main() {
     let cli = Cli::parse();
     let mut  todos = load_todos();
-
     match &cli.command {
         Commands::Add { task } => {
             let id = todos.len() + 1;
@@ -72,17 +72,27 @@ fn main() {
             };
             todos.push(new_todo);
             save_todos(&todos);
-            println!("🚀 Tarefa adicionada com sucesso!");
+            // Mensagem estilizada em verde e negrito
+            println!("{}", "🚀 Tarefa adicionada com sucesso!".green().bold());
         }
         Commands::List => {
             if todos.is_empty() {
-                println!("🎉 Nenhuma tarefa encontrada! Sua lista está limpa.");
+                // Mensagem em azul quando não há tarefas
+                println!("{}", "🎉 Nenhuma tarefa encontrada! Sua lista está limpa.".cyan());
                 return;
             }
-            println!("\n📋 SUA LISTA DE TAREFAS:");
+            // Cabeçalho em negrito e sublinhado
+            println!("\n{}", "📋 SUA LISTA DE TAREFAS:".bold().underline());
             for item in &todos {
-                let status = if item.completed { "[X]" } else { "[ ]" };
-                println!("  {} {}: {}", status, item.id, item.content);
+                if item.completed {
+                    // Tarefas concluídas: Status verde [X] e texto em cinza escuro (dimmed)
+                    let status = "[X]".green().bold();
+                    println!("  {} {}: {}", status, item.id.to_string().dimmed(), item.content.dimmed());
+                } else {
+                    // Tarefas pendentes: Status amarelo [ ] e ID/texto em branco destacado
+                    let status = "[ ]".yellow().bold();
+                    println!("  {} {}: {}", status, item.id, item.content.normal());
+                }
             }
             println!();
         }
@@ -90,38 +100,37 @@ fn main() {
             if let Some(item) = todos.iter_mut().find(|t| t.id == *id) {
                 item.completed = true;
                 save_todos(&todos);
-                println!("✅ Tarefa {} marcada como concluída!", id);
+                // Feedback de conclusão em verde-claro
+                println!("{}", format!("✅ Tarefa {} marcada como concluída!", id).green());
             } else {
-                println!("❌ Erro: Tarefa com o ID {} não foi encontrada.", id);
+                // Erros destacados em vermelho
+                println!("{}", format!("❌ Erro: Tarefa com o ID {} não foi encontrada.", id).red().bold());
             }
         }
         Commands::Delete { id } => {
             let tamanho_antes = todos.len();
-
-            // Mantém no vetor apenas as tarefas que NÃO têm o ID informado
             todos.retain(|item| item.id != *id);
 
             if todos.len() < tamanho_antes {
-                for(index,item) in todos.iter_mut().enumerate() {
+                for (index, item) in todos.iter_mut().enumerate() {
                     item.id = index + 1;
                 }
                 save_todos(&todos);
-                println!("🗑️ Tarefa {} removida e lista reorganizada com sucesso!", id);
+                // Feedback de deleção em magenta (roxo)
+                println!("{}", format!("🗑️ Tarefa {} removida e IDs reorganizados!", id).magenta());
             } else {
-                println!("❌ Erro: Tarefa com o ID {} não foi encontrada.", id);
+                println!("{}", format!("❌ Erro: Tarefa com o ID {} não foi encontrada.", id).red().bold());
             }
         }
         Commands::DeleteAll => {
             if !todos.is_empty() {
                 todos.clear();
-                save_todos(&todos);
-                println!("🗑️ Tarefas Limpas com sucesso!");
-            } else {
-                println!("❌ Erro: Nenhuma tarela encontrada para excluir")
+                println!("{}","🗑️ Todas as Tarefas Expluidas com sucesso!".green().bold());
             }
         }
     }
 }
+
 
 //pegar tudo
 fn load_todos() -> Vec<TodoItem> {
