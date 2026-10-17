@@ -1,104 +1,78 @@
-📋 Todo List CLI
+# 📋 Todo List CLI (Secure Version)
 
-Uma ferramenta de linha de comando (CLI) leve, rápida e moderna para gerenciamento de tarefas pessoais, desenvolvida inteiramente em **Rust** utilizando o framework `clap` e persistência automática em formato estruturado.
+Uma ferramenta de linha de comando (CLI) ultra veloz e moderna para gerenciamento de tarefas pessoais, desenvolvida em **Rust** utilizando o framework `clap` e persistência binária protegida contra alterações externas.
 
 ---
 
-## ✨ Funcionalidades (CRUD Completado)
+## ✨ Funcionalidades (CRUD + Segurança)
 
-*   **Create:** Adicione novas tarefas com facilidade.
-*   **Read:** Liste suas tarefas pendentes ou concluídas de forma organizada.
-*   **Update:** Marque tarefas como concluídas utilizando apenas o ID numérico.
-*   **Delete:** Remova tarefas permanentemente da sua lista.
-*   **Auto-reorganização:** Os IDs das tarefas remanescentes são reajustados automaticamente após qualquer exclusão.
-*   **Persistência Global:** Seus dados são salvos de forma centralizada no sistema, funcionando em qualquer diretório do seu terminal.
+*   **Create:** Adicione novas tarefas com facilidade (`add`).
+*   **Read:** Liste suas tarefas de forma organizada (`list`).
+*   **Update:** Marque tarefas como concluídas utilizando apenas o ID numérico (`done`).
+*   **Delete:** Remova tarefas individualmente (`delete`) ou limpe toda a lista (`delete-all`).
+*   **Auto-reorganização:** Os IDs das tarefas remanescentes são reajustados em cascata após qualquer exclusão.
+*   **Persistência Binária Avançada (`postcard`):** Os dados não são salvos em texto aberto. O aplicativo utiliza codificação de bytes compacta e segura.
+*   **Detecção de Adulteração:** Se o arquivo de dados for aberto e modificado manualmente por fora da CLI (ex: via Bloco de Notas), o aplicativo detectará a violação de integridade por segurança.
 
 ---
 
 ## 🚀 Como Instalar
 
-Como o projeto possui uma esteira automatizada no GitHub, você não precisa compilar o código na sua máquina caso não queira.
+Como o projeto possui uma esteira automatizada no GitHub Actions, você pode baixar as versões prontas diretamente.
 
-### Opção 1: Download Manual (Recomendado)
+### Opção 1: Download Manual
 1. Vá até a aba [Releases](https://github.com) do repositório.
 2. Baixe o binário correspondente ao seu sistema operacional (`todo-list-cli-windows.exe` ou `todo-list-cli-linux`).
-3. (Opcional) Adicione o executável às variáveis de ambiente do seu sistema para utilizá-lo globalmente apenas digitando `todo`.
+3. Adicione o executável às variáveis de ambiente do seu sistema para utilizá-lo globalmente digitando apenas `todo`.
 
-### Opção 2: Compilando a partir do Código Fonte (Requer Rust instalado)
-Se você tiver o ambiente Rust configurado, pode clonar e instalar localmente via Cargo:
-
+### Opção 2: Compilando do Código Fonte (Requer Rust)
 ```bash
-# Clonar o repositório
 git clone https://github.com/crl1092/todo_cli.git
 cd todo_cli
-
-# Instalar globalmente via Cargo
 cargo install --path .
 ```
 
 ---
 
-## 🛠️ Como Usar (Instruções de Uso)
+## 🛠️ Demonstração Visual e Comandos
 
-Após a instalação, você pode usar os seguintes subcomandos diretamente no seu terminal:
+Após a instalação, gerencie seu fluxo de trabalho no terminal:
 
-### 1. Adicionar uma Tarefa (`Add`)
-Insira uma nova tarefa na sua lista passando a descrição entre aspas.
 ```bash
+# 1. Adicionar tarefas
 todo add "Estudar conceitos de propriedade (ownership) em Rust"
 todo add "Limpar a mesa de trabalho"
-```
 
-### 2. Listar Tarefas (`List`)
-Exibe todas as tarefas salvas com seus respectivos IDs e status de conclusão.
-```bash
+# 2. Listar tarefas (Exibe status colorido: [ ] Pendente / [X] Concluído)
 todo list
-```
-*Saída esperada:*
-```text
-📋 SUA LISTA DE TAREFAS:
-  [ ] 1: Estudar conceitos de propriedade (ownership) em Rust
-  [ ] 2: Limpar a mesa de trabalho
-```
 
-### 3. Concluir uma Tarefa (`Done`)
-Modifica o status de uma tarefa específica para concluído utilizando o seu número identificador.
-```bash
+# 3. Concluir tarefa (Gera um efeito fosco/dimmed no texto)
 todo done 1
-```
 
-### 4. Remover uma Tarefa (`Delete`)
-Exclui permanentemente uma tarefa do arquivo e atualiza em cascata os IDs das tarefas seguintes.
-```bash
+# 4. Remover uma tarefa específica (Reorganiza os IDs automaticamente)
 todo delete 1
-```
 
-### 5. Limpa toda a lista de tarefas (DeleteAll)
-limpa permanentemente todas as tarefas 
-
-```bash
-    todo delete-all
+# 5. Limpar todo o histórico
+todo delete-all
 ```
 
 ---
 
-## 📦 Onde os dados ficam salvos?
+## 🔒 Segurança e Local dos Dados
 
-Para garantir estabilidade, as tarefas não se perdem quando você muda de diretório no terminal. O arquivo `todos.json` é armazenado nos caminhos padrões de dados de cada sistema:
-*   **No Windows:** `C:\Users\SEU_USUARIO\AppData\Roaming\todo-list-cli\todos.json`
-*   **No Linux:** `~/.local/share/todo-list-cli/todos.json`
+Para garantir que suas tarefas funcionem em qualquer lugar do terminal, o arquivo `todos.dat` é armazenado centralizadamente:
+*   **No Windows:** `C:\Users\SEU_USUARIO\AppData\Roaming\todo-list-cli\todos.dat`
+*   **No Linux:** `~/.local/share/todo-list-cli/todos.dat`
 
----
-
-## 🛠️ Tecnologias Utilizadas
-
-*   [Rust](https://rust-lang.org) — Linguagem base focada em segurança de memória e performance.
-*   [Clap (v4)](https://crates.io) — Gerenciador e parseador robusto de argumentos de linha de comando.
-*   [Serde / Serde_JSON](https://serde.rs) — Serialização ultra veloz de estruturas em texto estruturado.
-*   [Dirs](https://crates.io) — Descoberta multiplataforma de diretórios locais do sistema operacional.
+> ⚠️ **Nota de Integridade:** O arquivo utiliza serialização binária através da biblioteca **`postcard`**. Modificações manuais de caracteres que corrompam o formato binário farão com que a CLI acione o alerta de segurança e resete a estrutura para preservar a estabilidade da aplicação.
 
 ---
 
-## 📄 Licença
+## 🛠️ Dependências Utilizadas
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+*   [Rust](https://rust-lang.org) — Performance e segurança de memória.
+*   [Clap (v4)](https://crates.io) — Argument Parser robusto para CLI.
+*   [Serde](https://serde.rs) — Framework de serialização/deserialização.
+*   [Postcard](https://crates.io) — Serializador binário seguro focado em portabilidade.
+*   [Dirs](https://crates.io) — Descoberta multiplataforma de diretórios do sistema.
+*   [Colored](https://crates.io) — Estilização ansi de cores no terminal.

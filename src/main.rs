@@ -4,6 +4,7 @@ use std::io::{Read, Write };
 use std::path::PathBuf;
 use colored::*;
 
+
 #[derive(Parser)]
 #[command(name = "todo-cli")]
 #[command(about = "Uma CLI simples de lista de tarefas escrita em Rust", long_about = None)]
@@ -55,7 +56,7 @@ fn get_data_path() -> PathBuf {
     }
 
     // Define o nome do arquivo final
-    path.push("todos.json");
+    path.push("todos.dat");
     path
 }
 
@@ -126,6 +127,8 @@ fn main() {
             if !todos.is_empty() {
                 todos.clear();
                 println!("{}","🗑️ Todas as Tarefas Expluidas com sucesso!".green().bold());
+            } else {
+                println!("{}", "❌ Erro: Não foi possivel limpar todas as tarefas, pois não há nenhuma tarefa para limpar.".red().bold());
             }
         }
     }
@@ -136,30 +139,35 @@ fn main() {
 fn load_todos() -> Vec<TodoItem> {
     let path = get_data_path();
 
-    // Se o arquivo não existir, retorna uma lista vazia
     if !path.exists() {
         return Vec::new();
     }
 
-    // Abre o arquivo para leitura
-    let mut file = match File::open(path) {
+    let mut file = match File::open(&path) {
         Ok(f) => f,
         Err(_) => return Vec::new(),
     };
 
-    let mut contents = String::new();
-    if file.read_to_string(&mut contents).is_err() {
+    let mut buffer = Vec::new();
+    if file.read_to_end(&mut buffer).is_err() {
         return Vec::new();
     }
 
-    // Converte o texto JSON de volta para o Vetor de tarefas em Rust
-    serde_json::from_str(&contents).unwrap_or_else(|_| Vec::new())
+    // Tenta decodificar usando o Postcard seguro
+    match postcard::from_bytes(&buffer) {
+        Ok(todos) => todos,
+        Err(_) => {
+            // Detecção de adulteração manual ou arquivo corrompido
+            println!("{}", "\n⚠️ ALERTA DE SEGURANÇA: O arquivo de dados foi modificado externamente ou corrompido!".red().bold());
+            println!("{}", "Criando uma nova lista limpa para segurança do aplicativo.\n".yellow());
+            Vec::new()
+        }
+    }
 }
 
 fn save_todos(todos: &[TodoItem]) {
-    let path =get_data_path();
+    let path = get_data_path();
 
-    // Abre o arquivo configurado para sobrescrever ou criar se não existir
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
@@ -167,13 +175,10 @@ fn save_todos(todos: &[TodoItem]) {
         .open(path)
         .expect("Não foi possível abrir o arquivo para salvar.");
 
-    // Converte a estrutura de dados Rust para uma string formatada em JSON
-    let json = serde_json::to_string_pretty(todos)
-        .expect("Erro ao serializar os dados para JSON.");
+    // Serializa as tarefas em um vetor de bytes compacto (formato binário seguro e atualizado)
+    let bytes = postcard::to_allocvec(todos)
+        .expect("Erro grave ao codificar os dados em formato protegido.");
 
-    // Escreve os bytes no arquivo físico
-    file.write_all(json.as_bytes())
-        .expect("Erro ao gravar os dados no arquivo.");
+    file.write_all(&bytes)
+        .expect("Erro ao gravar os dados protegidos no disco.");
 }
-
-
