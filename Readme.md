@@ -71,8 +71,8 @@ Para garantir que suas tarefas funcionem em qualquer lugar do terminal, o arquiv
 ## 🛠️ Dependências Utilizadas
 
 *   [Rust](https://rust-lang.org) — Performance e segurança de memória.
-*   [Clap (v4)](https://crates.io) — Argument Parser robusto para CLI.
+*   [Clap (v4)](https://crates.io/crates/clap) — Argument Parser robusto para CLI.
 *   [Serde](https://serde.rs) — Framework de serialização/deserialização.
-*   [Postcard](https://crates.io) — Serializador binário seguro focado em portabilidade.
-*   [Dirs](https://crates.io) — Descoberta multiplataforma de diretórios do sistema.
-*   [Colored](https://crates.io) — Estilização ansi de cores no terminal.
+*   [Postcard](https://crates.io/crates/postcard) — Serializador binário seguro focado em portabilidade.
+*   [Dirs](https://crates.io/crates/dirs) — Descoberta multiplataforma de diretórios do sistema.
+*   [Colored](https://crates.io/crates/colored) — Estilização ansi de cores no terminal.
