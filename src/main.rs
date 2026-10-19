@@ -154,15 +154,12 @@ fn load_todos() -> Vec<TodoItem> {
     }
 
     // Tenta decodificar usando o Postcard seguro
-    match postcard::from_bytes(&buffer) {
-        Ok(todos) => todos,
-        Err(_) => {
-            // Detecção de adulteração manual ou arquivo corrompido
-            println!("{}", "\n⚠️ ALERTA DE SEGURANÇA: O arquivo de dados foi modificado externamente ou corrompido!".red().bold());
-            println!("{}", "Criando uma nova lista limpa para segurança do aplicativo.\n".yellow());
-            Vec::new()
-        }
-    }
+    postcard::from_bytes(&buffer).unwrap_or_else(|_| {
+        // Detecção de adulteração manual ou arquivo corrompido
+        println!("{}", "\n⚠️ ALERTA DE SEGURANÇA: O arquivo de dados foi modificado externamente ou corrompido!".red().bold());
+        println!("{}", "Criando uma nova lista limpa para segurança do aplicativo.\n".yellow());
+        Vec::new()
+    })
 }
 
 fn save_todos(todos: &[TodoItem]) {
